@@ -22,6 +22,7 @@ tree *maketree(int kind) {
       tree *this = (tree *) malloc(sizeof(struct treenode));
       this->nodeKind = kind;
       this->numChildren = 0;
+      this->lineno = -1;
       return this;
 }
 
@@ -30,6 +31,7 @@ tree *maketreeWithVal(int kind, int val) {
       this->nodeKind = kind;
       this->numChildren = 0;
       this->val = val;
+      this->lineno = -1;
       return this;
 }
 

@@ -924,68 +924,69 @@ case 27:
 YY_RULE_SETUP
 #line 71 "src/scanner.l"
 {updateCol();
-                 yylval.strval = (char *) malloc((size_t)yyleng + 1);
-                 strcpy(yylval.strval, yytext);
+                 yylval.id.text = (char *) malloc((size_t)yyleng + 1);
+                 strcpy(yylval.id.text, yytext);
+                 yylval.id.line = yylineno;
                  return ID;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 75 "src/scanner.l"
+#line 76 "src/scanner.l"
 {updateCol(); yyerrormsg = "Identifiers may not start with a digit"; return ERROR;}
 	YY_BREAK
 /* Constants */;
 case 29:
 YY_RULE_SETUP
-#line 78 "src/scanner.l"
+#line 79 "src/scanner.l"
 {updateCol(); yylval.value = atoi(yytext); return INTCONST;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 79 "src/scanner.l"
+#line 80 "src/scanner.l"
 {updateCol(); yyerrormsg = "Integers may not have leading zeros"; return ERROR;}
 	YY_BREAK
 case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
-#line 80 "src/scanner.l"
+#line 81 "src/scanner.l"
 {updateCol(); return processChar();}
 	YY_BREAK
 /* Comments */;
 case 32:
 /* rule 32 can match eol */
 YY_RULE_SETUP
-#line 83 "src/scanner.l"
+#line 84 "src/scanner.l"
 {updateCol(); /* skip comments */}
 	YY_BREAK
 case 33:
 /* rule 33 can match eol */
 YY_RULE_SETUP
-#line 84 "src/scanner.l"
+#line 85 "src/scanner.l"
 {updateCol(); yyerrormsg = "Unterminated comment"; return ERROR;}
 	YY_BREAK
 /* Other */;
 case 34:
 /* rule 34 can match eol */
 YY_RULE_SETUP
-#line 87 "src/scanner.l"
+#line 88 "src/scanner.l"
 {scancol = 1; scanlineno++; yylineno = scanlineno;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 88 "src/scanner.l"
+#line 89 "src/scanner.l"
 {updateCol(); /* skip whitespace */}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 89 "src/scanner.l"
+#line 90 "src/scanner.l"
 {return ILLEGAL_TOK;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 91 "src/scanner.l"
+#line 92 "src/scanner.l"
 ECHO;
 	YY_BREAK
-#line 988 "obj/lex.yy.c"
+#line 989 "obj/lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1990,7 +1991,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 91 "src/scanner.l"
+#line 92 "src/scanner.l"
 
 
 /* user routines */
