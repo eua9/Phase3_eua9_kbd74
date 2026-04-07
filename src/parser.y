@@ -42,10 +42,6 @@ static int lookup_fun(char *id) {
   return entry_index(ST_lookup_global(id));
 }
 
-static int char_from_charconst(char *s) {
-  if (!s || strlen(s) < 3) return 0;
-  return (unsigned char)s[1];
-}
 %}
 
 %union
@@ -58,7 +54,7 @@ static int char_from_charconst(char *s) {
 /* Token codes must match src/tokendef.h and scanner.l returns. */
 %token <strval> ID 251
 %token <value> INTCONST 252
-%token <strval> CHARCONST 253
+%token <value> CHARCONST 253
 %token <strval> STRCONST 254
 
 %token <strval> KWD_IF 255
@@ -447,7 +443,7 @@ factor          : LPAREN expression RPAREN
                 | CHARCONST
                  {
                     tree *n = maketree(FACTOR);
-                    addChild(n, maketreeWithVal(CHAR, char_from_charconst($1)));
+                    addChild(n, maketreeWithVal(CHAR, $1));
                     $$ = n;
                  }
                 ;

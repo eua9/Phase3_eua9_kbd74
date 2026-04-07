@@ -924,7 +924,7 @@ case 27:
 YY_RULE_SETUP
 #line 71 "src/scanner.l"
 {updateCol();
-                 yylval.strval = (char *) malloc(yyleng *sizeof(char));
+                 yylval.strval = (char *) malloc((size_t)yyleng + 1);
                  strcpy(yylval.strval, yytext);
                  return ID;}
 	YY_BREAK
