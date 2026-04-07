@@ -1,6 +1,8 @@
 #include<tree.h>
 #include<strtab.h>
 #include<stdio.h>
+
+extern char *get_symbol_id(int idx);
 #include<stdlib.h>
 #include<string.h>
 

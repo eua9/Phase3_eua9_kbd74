@@ -5,6 +5,8 @@
 #include<strtab.h>
 
 extern FILE* yyin;
+int yyparse(void);
+void print_sym_tab(void);
 
 void printhelp(){
     printf("Usage: mcc [--ast] [--sym] [-h|--help] FILE\n");
