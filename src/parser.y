@@ -14,6 +14,9 @@ int yyerror(char *msg);
 extern tree *ast;
 extern struct strEntry strTable[MAXIDS];
 extern symEntry *ST_lookup_global(char *id);
+extern void reset_formal_params(void);
+extern void add_param(int data_type, int symbol_type);
+extern void connect_params(int i, int num_params);
 
 enum nodeTypes {PROGRAM, DECLLIST, DECL, VARDECL, TYPESPEC, FUNDECL,
                 FORMALDECLLIST, FORMALDECL, FUNBODY, LOCALDECLLIST,
@@ -162,7 +165,9 @@ typeSpecifier   : KWD_INT
 
 varDecl         : typeSpecifier ID SEMICLN
                  {
-                    int idx = ST_insert($2, $1->val, SCALAR, NULL);
+                    int idx = ST_insert($2, $1->val, SCALAR, 0, NULL);
+                    if (idx < 0)
+                      printf("error: line %d: Symbol declared multiple times.\n", yylineno);
                     tree *n = maketree(VARDECL);
                     addChild(n, $1);
                     addChild(n, maketreeWithVal(IDENTIFIER, idx));
@@ -170,7 +175,11 @@ varDecl         : typeSpecifier ID SEMICLN
                  }
                 | typeSpecifier ID LSQ_BRKT INTCONST RSQ_BRKT SEMICLN
                  {
-                    int idx = ST_insert($2, $1->val, ARRAY, NULL);
+                    if ($4 == 0)
+                      printf("error: line %d: Array variable declared with size of zero.\n", yylineno);
+                    int idx = ST_insert($2, $1->val, ARRAY, $4, NULL);
+                    if (idx < 0)
+                      printf("error: line %d: Symbol declared multiple times.\n", yylineno);
                     tree *n = maketree(VARDECL);
                     addChild(n, $1);
                     addChild(n, maketreeWithVal(IDENTIFIER, idx));
@@ -181,11 +190,15 @@ varDecl         : typeSpecifier ID SEMICLN
 
 funcTypeName    : typeSpecifier ID
                  {
-                    int idx = ST_insert($2, $1->val, FUNCTION, NULL);
+                    reset_formal_params();
+                    int idx = ST_insert($2, $1->val, FUNCTION, 0, NULL);
+                    if (idx < 0)
+                      printf("error: line %d: Symbol declared multiple times.\n", yylineno);
+                    else
+                      scope = strTable[idx].id;
                     tree *n = maketree(FUNCTYPENAME);
                     addChild(n, $1);
                     addChild(n, maketreeWithVal(IDENTIFIER, idx));
-                    scope = strTable[idx].id;
                     $$ = n;
                  }
                 ;
@@ -207,7 +220,11 @@ formalDeclList  : formalDecl
 
 formalDecl      : typeSpecifier ID
                  {
-                    int idx = ST_insert($2, $1->val, SCALAR, NULL);
+                    int idx = ST_insert($2, $1->val, SCALAR, 0, NULL);
+                    if (idx < 0)
+                      printf("error: line %d: Symbol declared multiple times.\n", yylineno);
+                    else
+                      add_param($1->val, SCALAR);
                     tree *n = maketree(FORMALDECL);
                     addChild(n, $1);
                     addChild(n, maketreeWithVal(IDENTIFIER, idx));
@@ -215,7 +232,11 @@ formalDecl      : typeSpecifier ID
                  }
                 | typeSpecifier ID LSQ_BRKT RSQ_BRKT
                  {
-                    int idx = ST_insert($2, $1->val, ARRAY, NULL);
+                    int idx = ST_insert($2, $1->val, ARRAY, 0, NULL);
+                    if (idx < 0)
+                      printf("error: line %d: Symbol declared multiple times.\n", yylineno);
+                    else
+                      add_param($1->val, ARRAY);
                     tree *n = maketree(FORMALDECL);
                     addChild(n, $1);
                     addChild(n, maketreeWithVal(IDENTIFIER, idx));
@@ -226,6 +247,9 @@ formalDecl      : typeSpecifier ID
 
 funDecl         : funcTypeName LPAREN formalDeclList RPAREN LCRLY_BRKT localDeclList statementList RCRLY_BRKT
                  {
+                    int func_idx = getChild($1, 1)->val;
+                    if (func_idx >= 0)
+                      connect_params(func_idx, 0);
                     tree *n = maketree(FUNDECL);
                     addChild(n, $1);
                     addChild(n, $3);
@@ -238,6 +262,9 @@ funDecl         : funcTypeName LPAREN formalDeclList RPAREN LCRLY_BRKT localDecl
                  }
                 | funcTypeName LPAREN RPAREN LCRLY_BRKT localDeclList statementList RCRLY_BRKT
                  {
+                    int func_idx = getChild($1, 1)->val;
+                    if (func_idx >= 0)
+                      connect_params(func_idx, 0);
                     tree *n = maketree(FUNDECL);
                     addChild(n, $1);
                     tree *body = maketree(FUNBODY);

@@ -43,12 +43,26 @@ static int probe_find(char *id, const char *scopestr) {
   return -1;
 }
 
-int ST_insert(char *id, int data_type, int symbol_type, int *scope_idx_out) {
+void reset_formal_params(void) {
+  param *p = working_list_head;
+  while (p) {
+    param *n = p->next;
+    free(p);
+    p = n;
+  }
+  working_list_head = working_list_end = NULL;
+}
+
+int ST_insert(char *id, int data_type, int symbol_type, int size, int *idx_out) {
   char keyBuf[512];
   const char *s = scope ? scope : "";
   snprintf(keyBuf, sizeof(keyBuf), "%s%s", s, id ? id : "");
   int startIndex = hash((unsigned char *)keyBuf);
   int idx = startIndex;
+
+  /* Duplicate in this scope? */
+  if (probe_find(id, s) >= 0)
+    return -1;
 
   for (int i = 0; i < MAXIDS; i++) {
     if (strTable[idx].id == NULL) {
@@ -56,14 +70,10 @@ int ST_insert(char *id, int data_type, int symbol_type, int *scope_idx_out) {
       strTable[idx].scope = strdup(s);
       strTable[idx].data_type = data_type;
       strTable[idx].symbol_type = symbol_type;
-      if (scope_idx_out)
-        *scope_idx_out = idx;
-      return idx;
-    }
-    if (strcmp(strTable[idx].id, id ? id : "") == 0 &&
-        strcmp(strTable[idx].scope, s) == 0) {
-      if (scope_idx_out)
-        *scope_idx_out = idx;
+      strTable[idx].size = size;
+      strTable[idx].params = NULL;
+      if (idx_out)
+        *idx_out = idx;
       return idx;
     }
     idx = (idx + 1) % MAXIDS;
@@ -108,13 +118,30 @@ void print_sym_tab(void) {
 }
 
 void add_param(int data_type, int symbol_type) {
-  (void)data_type;
-  (void)symbol_type;
+  param *p = (param *)malloc(sizeof(param));
+  if (!p)
+    return;
+  p->data_type = data_type;
+  p->symbol_type = symbol_type;
+  p->next = NULL;
+  if (!working_list_end) {
+    working_list_head = working_list_end = p;
+  } else {
+    working_list_end->next = p;
+    working_list_end = p;
+  }
 }
 
 void connect_params(int i, int num_params) {
-  (void)i;
   (void)num_params;
+  if (i < 0 || i >= MAXIDS)
+    return;
+  int n = 0;
+  for (param *p = working_list_head; p; p = p->next)
+    n++;
+  strTable[i].params = working_list_head;
+  strTable[i].size = n;
+  working_list_head = working_list_end = NULL;
 }
 
 void new_scope(void) { }
