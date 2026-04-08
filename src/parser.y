@@ -32,6 +32,8 @@ enum nodeTypes {PROGRAM, DECLLIST, DECL, VARDECL, TYPESPEC, FUNDECL,
 
 enum opType {ADD, SUB, MUL, DIV, LT, LTE, EQ, GTE, GT, NEQ};
 
+#define SET_LINE(NODE, LIN) do { if ((NODE) && (LIN) > 0) (NODE)->lineno = (LIN); } while (0)
+
 char* scope = "";
 
 static int entry_index(symEntry *e) {
@@ -56,7 +58,10 @@ static int lookup_fun(char *id) {
     int value;
     struct treenode *node;
     char *strval;
-    struct { char *text; int line; } id;
+    struct {
+      char *text;
+      int line;
+    } id;
 }
 
 /* Token codes must match src/tokendef.h and scanner.l returns. */
