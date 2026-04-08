@@ -7,7 +7,7 @@ YACC=yacc
 YFLAGS=-v -d -b obj/y
 GRAMMAR=parser.y
 
-obj/mcc: obj/lex.yy.o obj/y.tab.o obj/tree.o obj/driver.o obj/strtab.o | obj
+obj/mcc: obj/lex.yy.o obj/y.tab.o obj/tree.o obj/driver.o obj/strtab.o obj/semantic.o | obj
 	$(CC) $(CFLAGS) -o $@ $^ -ll
 
 obj/y.tab.o: obj/y.tab.c | obj
@@ -30,6 +30,9 @@ obj/driver.o: src/driver.c src/tree.h obj/y.tab.h | obj
 
 obj/strtab.o: src/strtab.c src/strtab.h obj/y.tab.h | obj
 	$(CC)  $(CFLAGS) -c $< -o $@
+
+obj/semantic.o: src/semantic.c src/semantic.h src/tree.h src/strtab.h | obj
+	$(CC) $(CFLAGS) -c $< -o $@
 
 .PHONY: clean test objdir
 

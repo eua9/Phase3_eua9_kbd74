@@ -10,6 +10,7 @@ struct treenode {
       int nodeKind;
       int numChildren;
       int val;
+      int lineno;
       int scope; // Used for var/id. Index of the scope. This works b/c only global and local.
       int type;
       int sym_type; // Only used by var to distinguish SCALAR vs ARRAY
