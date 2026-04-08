@@ -4,6 +4,8 @@
 #include<string.h>
 #include<../src/tree.h>
 #include<../src/strtab.h>
+#include<../src/semantic.h>
+#include<../src/codegen.h>
 
 extern int yylineno;
 extern int yylex(void);
@@ -17,6 +19,8 @@ extern symEntry *ST_lookup_global(char *id);
 extern void reset_formal_params(void);
 extern void add_param(int data_type, int symbol_type);
 extern void connect_params(int i, int num_params);
+
+#define SET_LINE(NODE, LIN) do { if ((NODE) && (LIN) > 0) (NODE)->lineno = (LIN); } while (0)
 
 enum nodeTypes {PROGRAM, DECLLIST, DECL, VARDECL, TYPESPEC, FUNDECL,
                 FORMALDECLLIST, FORMALDECL, FUNBODY, LOCALDECLLIST,
@@ -130,6 +134,9 @@ program         : declList
                     SET_LINE(progNode, $1->lineno > 0 ? $1->lineno : 1);
                     addChild(progNode, $1);
                     ast = progNode;
+                    semantic_analyze(ast);
+                    if (codegen_enabled)
+                      codegen_generate(ast);
                  }
                 ;
 
@@ -200,9 +207,9 @@ varDecl         : typeSpecifier ID SEMICLN
                     tree *idn = maketreeWithVal(IDENTIFIER, idx);
                     SET_LINE(idn, $2.line);
                     addChild(n, idn);
-                    tree *iz = maketreeWithVal(INTEGER, $4);
-                    SET_LINE(iz, yylineno);
-                    addChild(n, iz);
+                    tree *isz = maketreeWithVal(INTEGER, $4);
+                    SET_LINE(isz, yylineno);
+                    addChild(n, isz);
                     $$ = n;
                  }
                 ;
