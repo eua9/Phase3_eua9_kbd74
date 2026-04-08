@@ -5,6 +5,7 @@
 #include<../src/tree.h>
 #include<../src/strtab.h>
 #include<../src/semantic.h>
+#include<../src/codegen.h>
 
 extern int yylineno;
 extern int yylex(void);
@@ -129,6 +130,8 @@ program         : declList
                     addChild(progNode, $1);
                     ast = progNode;
                     semantic_analyze(ast);
+                    if (codegen_enabled)
+                      codegen_generate(ast);
                  }
                 ;
 
